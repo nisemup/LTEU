@@ -1,5 +1,5 @@
 import keyboard as key
-import text as t
+from language import uk_UA as t
 from database import connect
 from aiogram import Dispatcher, types
 from aiogram.dispatcher import FSMContext

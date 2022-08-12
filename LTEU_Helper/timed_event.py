@@ -3,8 +3,8 @@ import datetime
 from asyncio import sleep
 import aiogram
 from database import connect
-import text as t
-import config as c
+from language import uk_UA as t
+from settings import config as c
 from loader import bot
 
 

@@ -1,11 +1,11 @@
 from asyncio import sleep
 import aiogram
 import keyboard as key
-import text as t
+from language import uk_UA as t
 from loader import bot
 from database import connect
 from aiogram import Dispatcher, types
-import config as config
+from settings import config as config
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters import Text
 from aiogram.dispatcher.filters.state import State, StatesGroup

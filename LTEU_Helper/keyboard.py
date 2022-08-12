@@ -1,6 +1,6 @@
 from aiogram import types
-import text as t
-from config import admins
+from language import uk_UA as t
+from settings.config import admins
 
 
 def main():

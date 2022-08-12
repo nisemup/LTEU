@@ -1,5 +1,5 @@
 from loader import bot, dp
-from config import c_get_key
+from settings.config import c_get_key
 from database import create_db
 from aiogram.utils import executor
 from aiogram.types import BotCommand

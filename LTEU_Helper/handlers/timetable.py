@@ -1,6 +1,6 @@
 import keyboard as key
-import text as t
-from config import c_get
+from language import uk_UA as t
+from settings.config import c_get
 from database import connect
 from aiogram import Dispatcher, types
 from aiogram.dispatcher import FSMContext

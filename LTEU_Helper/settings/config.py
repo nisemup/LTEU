@@ -2,9 +2,9 @@ import configparser
 import os
 import re
 
-settings = "settings.ini"
-practice = 'practice.ini'
-lectures = 'lectures.ini'
+settings = "settings/settings.ini"
+practice = 'settings/practice.ini'
+lectures = 'settings/lectures.ini'
 sgs = configparser.ConfigParser()
 sgs.read(settings)
 pr = configparser.ConfigParser()
@@ -14,15 +14,14 @@ lc.read(lectures)
 
 
 def c_create():
-    if not os.path.exists('settings.ini'):
+    if not os.path.exists('settings/settings.ini'):
         sgs.add_section('SETTINGS')
 
-        sgs.set('SETTINGS', 'token', '1984220722:AAHRXPGBeMHEZS4e-0LC0wLZuPcJ-Z3w9s4')
         sgs.set('SETTINGS', 'main_admin', '516654350')
         sgs.set('SETTINGS', 'admins', '516654350,516654350')
         sgs.set('SETTINGS', 'preset', 'lectures')
 
-    if not os.path.exists('practice.ini'):
+    if not os.path.exists('settings/practice.ini'):
         pr.add_section('FORM')
 
         pr.set('FORM', '1', '1️⃣| Перша пара: <b>{lesson} | 8:30 - 9:50 | {house}</b>')
@@ -274,7 +273,7 @@ def c_create():
         pr.set('G_3_fri', '5', "5️⃣| П'ята пара: <b>пари немає</b>")
         pr.set('G_3_fri', '6', "6️⃣| Шоста пара: <b>пари немає</b>")
 
-    if not os.path.exists('lectures.ini'):
+    if not os.path.exists('settings/lectures.ini'):
         lc.add_section('FORM')
 
         lc.set('FORM', '1', '1️⃣| Перша пара: <b>{lesson} | 8:30 - 9:50 | {house}</b>')
@@ -583,11 +582,11 @@ def c_get_key(section, key, path='presets'):
 
 def c_save(path='settings'):
     if path == 'settings':
-        with open('settings.ini', "w") as config_file:
+        with open('settings/settings.ini', "w") as config_file:
             sgs.write(config_file)
-        with open('lectures.ini', "w") as config_file:
+        with open('settings/lectures.ini', "w") as config_file:
             lc.write(config_file)
-        with open('practice.ini', "w") as config_file:
+        with open('settings/practice.ini', "w") as config_file:
             pr.write(config_file)
     elif path == 'presets':
         if sgs.get('SETTINGS', 'preset') == 'lectures':
