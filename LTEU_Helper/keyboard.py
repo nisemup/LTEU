@@ -1,11 +1,24 @@
 from aiogram import types
+from database import Database
 from language import uk_UA as t
 from settings.config import admins
 
 
-def main():
+def inline_choose(item, table, line=None, value=None, where=False):
+    keyboard = types.InlineKeyboardMarkup()
+    items = {}
+    with Database() as db:
+        db_list = db.select_distinct(item, table, line, value, where)
+        for i in range(len(db_list)):
+            items[f'{db_list[i][0]}'] = db_list[i][0]
+    for key, value in items.items():
+        keyboard.add(types.InlineKeyboardButton(text=value, callback_data=key))
+    return keyboard
+
+
+def cancel():
     keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True)
-    keyboard.add(t.b_group)
+    keyboard.add(t.b_cancel)
     return keyboard
 
 
@@ -24,18 +37,11 @@ def day():
     return keyboard
 
 
-def lang():
-    keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True)
-    keyboard.add(t.b_group)
-    keyboard.add(t.b_back)
-    return keyboard
-
-
-def main_success(message):
+def main_success(aid):
     keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True)
     keyboard.add(t.b_timetable)
     keyboard.add(t.b_settings)
-    if message.chat.id in admins():
+    if aid in admins():
         keyboard.add(t.b_admin)
     return keyboard
 
@@ -79,16 +85,14 @@ def pairs():
     return keyboard
 
 
-def sdl(call='None'):
+def sdl(call=None):
     keyboard = types.InlineKeyboardMarkup()
     mon = types.InlineKeyboardButton(text='Пн', callback_data='mon')
     tue = types.InlineKeyboardButton(text='Вт', callback_data='tue')
     wed = types.InlineKeyboardButton(text='Ср', callback_data='wed')
     thu = types.InlineKeyboardButton(text='Чт', callback_data='thu')
     fri = types.InlineKeyboardButton(text='Пт', callback_data='fri')
-    if call == 'None':
-        pass
-    else:
+    if call:
         if call.data == 'mon':
             mon = types.InlineKeyboardButton(text='👁', callback_data='mon')
         elif call.data == 'tue':

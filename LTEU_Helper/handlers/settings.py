@@ -1,11 +1,13 @@
 from aiogram.dispatcher import FSMContext
-
 import keyboard as key
 from language import uk_UA as t
-from database import connect, update_db
+from database import Database
 from aiogram import Dispatcher, types
 from aiogram.dispatcher.filters import Text
 from aiogram.dispatcher.filters.state import State, StatesGroup
+
+
+# TODO: Remake group change
 
 
 class Settings(StatesGroup):
@@ -33,15 +35,18 @@ async def type_chosen(message: types.Message):
 
 async def notification(message: types.Message, state: FSMContext):
     if message.text == t.b_on_off:
-        db, cursor = connect()
-        cursor.execute(f"""SELECT notification FROM users WHERE id = {message.chat.id}""")
-        if cursor.fetchone()[0] == 1:
-            update_db(message, 'notification', 0)
-            await message.answer(t.off_ntfc, reply_markup=key.main_success(message))
-        else:
-            update_db(message, 'notification', 1)
-            await message.answer(t.on_ntfc, reply_markup=key.main_success(message))
+        with Database() as db:
+            fetchone = db.select_db('notification', 'users', 'id', message.chat.id)
+            if fetchone[0] == 1:
+                db.update_db('users', 'notification', 0, 'id', message.chat.id)
+                await message.answer(t.off_ntfc, reply_markup=key.main_success(message))
+            elif fetchone[0] == 0:
+                db.update_db('users', 'notification', 1, 'id', message.chat.id)
+                await message.answer(t.on_ntfc, reply_markup=key.main_success(message))
+            else:
+                await message.answer(t.error_func, reply_markup=key.main_success(message))
         await state.finish()
+
     elif message.text == t.b_back:
         await message.answer(t.b_menu_chosen, reply_markup=key.settings())
         await Settings.menu_chosen.set()
@@ -51,21 +56,22 @@ async def notification(message: types.Message, state: FSMContext):
 
 
 async def group(message: types.Message, state: FSMContext):
-    if message.text == '1':
-        update_db(message, 'group_id', 1)
-    elif message.text == '2':
-        update_db(message, 'group_id', 2)
-    elif message.text == '3':
-        update_db(message, 'group_id', 3)
-    elif message.text == t.b_back:
-        await message.answer(t.b_menu_chosen, reply_markup=key.settings())
-        await Settings.menu_chosen.set()
-        return
-    else:
-        await message.answer(t.error_text)
-        return
-    await message.answer(t.group_change.format(message.text), reply_markup=key.main_success(message))
-    await state.finish()
+    with Database() as db:
+        if message.text == '1':
+            db.update_db('users', 'group_id', 1, 'id', message.chat.id)
+        elif message.text == '2':
+            db.update_db('users', 'group_id', 2, 'id', message.chat.id)
+        elif message.text == '3':
+            db.update_db('users', 'group_id', 3, 'id', message.chat.id)
+        elif message.text == t.b_back:
+            await message.answer(t.b_menu_chosen, reply_markup=key.settings())
+            await Settings.menu_chosen.set()
+            return
+        else:
+            await message.answer(t.error_text)
+            return
+        await message.answer(t.group_change.format(message.text), reply_markup=key.main_success(message))
+        await state.finish()
 
 
 def register_handlers_settings(dp: Dispatcher):

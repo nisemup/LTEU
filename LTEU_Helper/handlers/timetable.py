@@ -1,7 +1,7 @@
 import keyboard as key
 from language import uk_UA as t
 from settings.config import c_get
-from database import connect
+from database import Database
 from aiogram import Dispatcher, types
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters import Text
@@ -14,9 +14,9 @@ class TimeTable(StatesGroup):
 
 
 async def cmd_timetable(message: types.Message, state: FSMContext):
-    db, cursor = connect()
-    cursor.execute(f"""SELECT * FROM users WHERE id = {message.chat.id}""")
-    await state.update_data(group=cursor.fetchone()[1])
+    with Database() as db:
+        fetchone = db.select_db('*', 'users', 'id', message.chat.id)
+    await state.update_data(group=fetchone[1])
     await message.answer(t.day_text, reply_markup=key.sdl())
     await TimeTable.cb_mon.set()
 
@@ -24,41 +24,42 @@ async def cmd_timetable(message: types.Message, state: FSMContext):
 async def callback_register(call: types.CallbackQuery, state: FSMContext):
     data = await state.get_data()
     try:
+        # TODO: Remake this trash
         if call.data == 'mon':
             if data['group'] == 1:
-                await call.message.edit_text('Розклад для 151 групи\n\n' + c_get('G_1_mon'), reply_markup=key.sdl(call))
+                await call.message.edit_text(t.schedule_gp1 + c_get('G_1_mon'), reply_markup=key.sdl(call))
             elif data['group'] == 2:
-                await call.message.edit_text('Розклад для 152 групи\n\n' + c_get('G_2_mon'), reply_markup=key.sdl(call))
+                await call.message.edit_text(t.schedule_gp2 + c_get('G_2_mon'), reply_markup=key.sdl(call))
             elif data['group'] == 3:
-                await call.message.edit_text('Розклад для 153 групи\n\n' + c_get('G_3_mon'), reply_markup=key.sdl(call))
+                await call.message.edit_text(t.schedule_gp3 + c_get('G_3_mon'), reply_markup=key.sdl(call))
         elif call.data == 'tue':
             if data['group'] == 1:
-                await call.message.edit_text('Розклад для 151 групи\n\n' + c_get('G_1_tue'), reply_markup=key.sdl(call))
+                await call.message.edit_text(t.schedule_gp1 + c_get('G_1_tue'), reply_markup=key.sdl(call))
             elif data['group'] == 2:
-                await call.message.edit_text('Розклад для 152 групи\n\n' + c_get('G_2_tue'), reply_markup=key.sdl(call))
+                await call.message.edit_text(t.schedule_gp2 + c_get('G_2_tue'), reply_markup=key.sdl(call))
             elif data['group'] == 3:
-                await call.message.edit_text('Розклад для 153 групи\n\n' + c_get('G_3_tue'), reply_markup=key.sdl(call))
+                await call.message.edit_text(t.schedule_gp3 + c_get('G_3_tue'), reply_markup=key.sdl(call))
         elif call.data == 'wed':
             if data['group'] == 1:
-                await call.message.edit_text('Розклад для 151 групи\n\n' + c_get('G_1_wed'), reply_markup=key.sdl(call))
+                await call.message.edit_text(t.schedule_gp1 + c_get('G_1_wed'), reply_markup=key.sdl(call))
             elif data['group'] == 2:
-                await call.message.edit_text('Розклад для 152 групи\n\n' + c_get('G_2_wed'), reply_markup=key.sdl(call))
+                await call.message.edit_text(t.schedule_gp2 + c_get('G_2_wed'), reply_markup=key.sdl(call))
             elif data['group'] == 3:
-                await call.message.edit_text('Розклад для 153 групи\n\n' + c_get('G_3_wed'), reply_markup=key.sdl(call))
+                await call.message.edit_text(t.schedule_gp3 + c_get('G_3_wed'), reply_markup=key.sdl(call))
         elif call.data == 'thu':
             if data['group'] == 1:
-                await call.message.edit_text('Розклад для 151 групи\n\n' + c_get('G_1_thu'), reply_markup=key.sdl(call))
+                await call.message.edit_text(t.schedule_gp1 + c_get('G_1_thu'), reply_markup=key.sdl(call))
             elif data['group'] == 2:
-                await call.message.edit_text('Розклад для 152 групи\n\n' + c_get('G_2_thu'), reply_markup=key.sdl(call))
+                await call.message.edit_text(t.schedule_gp2 + c_get('G_2_thu'), reply_markup=key.sdl(call))
             elif data['group'] == 3:
-                await call.message.edit_text('Розклад для 153 групи\n\n' + c_get('G_3_thu'), reply_markup=key.sdl(call))
+                await call.message.edit_text(t.schedule_gp3 + c_get('G_3_thu'), reply_markup=key.sdl(call))
         elif call.data == 'fri':
             if data['group'] == 1:
-                await call.message.edit_text('Розклад для 151 групи\n\n' + c_get('G_1_fri'), reply_markup=key.sdl(call))
+                await call.message.edit_text(t.schedule_gp1 + c_get('G_1_fri'), reply_markup=key.sdl(call))
             elif data['group'] == 2:
-                await call.message.edit_text('Розклад для 152 групи\n\n' + c_get('G_2_fri'), reply_markup=key.sdl(call))
+                await call.message.edit_text(t.schedule_gp2 + c_get('G_2_fri'), reply_markup=key.sdl(call))
             elif data['group'] == 3:
-                await call.message.edit_text('Розклад для 153 групи\n\n' + c_get('G_3_fri'), reply_markup=key.sdl(call))
+                await call.message.edit_text(t.schedule_gp3 + c_get('G_3_fri'), reply_markup=key.sdl(call))
         await call.answer()
         return
     except Exception as ex:

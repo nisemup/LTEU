@@ -1,6 +1,6 @@
 from loader import bot, dp
 from settings.config import c_get_key
-from database import create_db
+from database import Database
 from aiogram.utils import executor
 from aiogram.types import BotCommand
 from handlers.admin import register_handlers_admin
@@ -23,7 +23,8 @@ async def on_shutdown(dp):
 
 
 async def on_startup(dp):
-    create_db()
+    with Database() as db:
+        db.create_db()
 
     await bot.send_message(c_get_key('SETTINGS', 'main_admin', 'settings'), "! Бот успешно запущен !")
 

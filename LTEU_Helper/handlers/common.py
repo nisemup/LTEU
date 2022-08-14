@@ -1,6 +1,6 @@
 import keyboard as key
 from language import uk_UA as t
-from database import connect
+from database import Database
 from aiogram import Dispatcher, types
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters import Text
@@ -8,64 +8,54 @@ from aiogram.dispatcher.filters.state import State, StatesGroup
 
 
 class StartHandler(StatesGroup):
-    start_chosen = State()
-    group_chosen = State()
+    faculty_choose = State()
+    user_register = State()
 
 
 async def start(message: types.Message, state: FSMContext):
     await state.finish()
-    db, cursor = connect()
     try:
-        cursor.execute(f"""SELECT group_id FROM users WHERE id = {message.chat.id}""")
-        if cursor.fetchone()[0] != 0 and not None:
-            await message.answer(t.hi_text, reply_markup=key.main_success(message))
+        with Database() as db:
+            fetchone = db.select_db('group_id', 'users', 'id', message.chat.id)
+        if fetchone[0] != 0 and not None:
+            await message.answer(t.hi_text, reply_markup=key.main_success(message.chat.id))
             await state.finish()
             return
     except TypeError:
+        # TODO: make exception, rework reg check
         pass
-    await message.answer(t.start_message, reply_markup=key.main())
-    await StartHandler.start_chosen.set()
+    await message.answer(t.faculty_message, reply_markup=key.inline_choose('faculty', 'groups'))
+    await StartHandler.faculty_choose.set()
 
 
-async def start_chosen(message: types.Message):
-    if message.text == t.b_group:
-        await message.answer(t.group_text, reply_markup=key.group())
-        await StartHandler.group_chosen.set()
-    else:
-        await message.answer(t.error_text)
-        return
+async def cb_faculty(call: types.CallbackQuery, state: FSMContext):
+    await state.update_data(faculty=call.data)
+    await call.message.edit_text(t.faculty_confirm + call.data)
+    await call.message.answer(t.group_message,
+                              reply_markup=key.inline_choose('group_num', 'groups', 'faculty', call.data, True))
+    await call.answer()
+    await StartHandler.user_register.set()
 
 
-async def group_chosen(message: types.Message, state: FSMContext):
-    db, cursor = connect()
-    cursor.execute(f"""SELECT id FROM users WHERE id = {message.chat.id}""")
-    if cursor.fetchone() is None:
-        cursor.execute("""INSERT INTO users VALUES (?, ?, ?)""", (message.chat.id, 0, 1))
-    if message.text == '1':
-        cursor.execute(f"""UPDATE users SET group_id = 1 WHERE id ={message.chat.id}""")
-    elif message.text == '2':
-        cursor.execute(f"""UPDATE users SET group_id = 2 WHERE id ={message.chat.id}""")
-    elif message.text == '3':
-        cursor.execute(f"""UPDATE users SET group_id = 3 WHERE id ={message.chat.id}""")
-    elif message.text == t.b_back:
-        db.commit()
-        await message.answer(t.start_message, reply_markup=key.main())
-        await StartHandler.start_chosen.set()
-    else:
-        await message.answer(t.error_text)
-        return
-    db.commit()
-    await message.answer(t.hi_text, reply_markup=key.main_success(message))
+async def user_register(call: types.CallbackQuery, state: FSMContext):
+    data = await state.get_data()
+    await call.message.edit_text(t.group_confirm + call.data)
+    with Database() as db:
+        fetchone = db.select_db('id', 'users', 'id', call.message.chat.id)
+        gid = db.select_gid(data['faculty'], call.data)
+        if fetchone is None:
+            db.create_user(call.message.chat.id, gid[0])
+    await call.message.answer(t.hi_text, reply_markup=key.main_success(call.message.chat.id))
     await state.finish()
 
 
 async def cancel(message: types.Message, state: FSMContext):
-    await message.answer("Відміна!", reply_markup=key.main_success(message))
+    await message.answer("Відміна!", reply_markup=key.main_success(message.chat.id))
     await state.finish()
 
 
 def register_handlers_common(dp: Dispatcher):
     dp.register_message_handler(start, commands="start", state="*")
-    dp.register_message_handler(start_chosen, state=StartHandler.start_chosen)
-    dp.register_message_handler(group_chosen, state=StartHandler.group_chosen)
+    dp.register_callback_query_handler(cb_faculty, state=StartHandler.faculty_choose)
+    dp.register_callback_query_handler(user_register, state=StartHandler.user_register)
     dp.register_message_handler(cancel, Text(equals=t.b_cancel, ignore_case=False), state="*")

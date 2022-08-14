@@ -2,7 +2,7 @@ import configparser
 import os
 import re
 
-settings = "settings/settings.ini"
+settings = 'settings/settings.ini'
 practice = 'settings/practice.ini'
 lectures = 'settings/lectures.ini'
 sgs = configparser.ConfigParser()
@@ -590,10 +590,10 @@ def c_save(path='settings'):
             pr.write(config_file)
     elif path == 'presets':
         if sgs.get('SETTINGS', 'preset') == 'lectures':
-            with open('lectures.ini', "w") as config_file:
+            with open('settings/lectures.ini', "w") as config_file:
                 lc.write(config_file)
         else:
-            with open('practice.ini', "w") as config_file:
+            with open('settings/practice.ini', "w") as config_file:
                 pr.write(config_file)
 
 

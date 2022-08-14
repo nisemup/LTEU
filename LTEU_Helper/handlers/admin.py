@@ -3,7 +3,7 @@ import aiogram
 import keyboard as key
 from language import uk_UA as t
 from loader import bot
-from database import connect
+from database import Database
 from aiogram import Dispatcher, types
 from settings import config as config
 from aiogram.dispatcher import FSMContext
@@ -63,9 +63,9 @@ async def newsletter(message: types.Message, state: FSMContext):
 async def confirm_send(message: types.Message, state: FSMContext):
     if message.text == t.b_send_news:
         data = await state.get_data()
-        db, cursor = connect()
-        cursor.execute(f"""SELECT * FROM users""")
-        users = [user[0] for user in cursor.fetchall()]
+        with Database() as db:
+            fetchall = db.select_all('users')
+        users = [user[0] for user in fetchall]
         for user in users:
             try:
                 print('Рассылка...')
