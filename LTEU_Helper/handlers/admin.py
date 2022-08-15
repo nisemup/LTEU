@@ -77,7 +77,7 @@ async def confirm_send(message: types.Message, state: FSMContext):
     else:
         await message.answer(t.error_text)
         return
-    await message.answer(t.hi_text, reply_markup=key.main_success(message))
+    await message.answer(t.hi_text, reply_markup=key.main_menu(message.chat.id))
     await state.finish()
 
 

@@ -37,7 +37,7 @@ def day():
     return keyboard
 
 
-def main_success(aid):
+def main_menu(aid):
     keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True)
     keyboard.add(t.b_timetable)
     keyboard.add(t.b_settings)
@@ -85,14 +85,16 @@ def pairs():
     return keyboard
 
 
-def sdl(call=None):
+def sdl(call='None'):
     keyboard = types.InlineKeyboardMarkup()
     mon = types.InlineKeyboardButton(text='Пн', callback_data='mon')
     tue = types.InlineKeyboardButton(text='Вт', callback_data='tue')
     wed = types.InlineKeyboardButton(text='Ср', callback_data='wed')
     thu = types.InlineKeyboardButton(text='Чт', callback_data='thu')
     fri = types.InlineKeyboardButton(text='Пт', callback_data='fri')
-    if call:
+    if call == 'None':
+        pass
+    else:
         if call.data == 'mon':
             mon = types.InlineKeyboardButton(text='👁', callback_data='mon')
         elif call.data == 'tue':

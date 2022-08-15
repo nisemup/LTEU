@@ -4,6 +4,7 @@
 
 # db
 *.db
+*.log
 
 
 # User-specific stuff

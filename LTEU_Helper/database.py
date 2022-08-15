@@ -55,7 +55,6 @@ class Database:
             self.cursor.execute("""INSERT INTO groups VALUES (?, ?, ?)""", (gid, faculty, group_num))
             self.con.commit()
         except BaseException as er:
-            print(er)
             return None
 
     def create_user(self, uid, gid):
@@ -74,8 +73,6 @@ class Database:
             """)
             return self.cursor.fetchone()
         except BaseException as er:
-            print('2')
-            print(er)
             return None
 
     def select_distinct(self, item, table, line=None, value=None, where=False):
@@ -85,7 +82,6 @@ class Database:
             """)
             return self.cursor.fetchall()
         except BaseException as er:
-            print(er)
             pass
 
     def select_all(self, table):
@@ -93,16 +89,13 @@ class Database:
             self.cursor.execute(f"""SELECT * FROM {table}""")
             return self.cursor.fetchall()
         except BaseException as er:
-            print(er)
             return None
 
     def select_db(self, item, table, line, value):
         try:
             self.cursor.execute(f""" SELECT {item} FROM {table} WHERE {line} = '{value}'""")
             return self.cursor.fetchone()
-        except BaseException as er:
-            print('1')
-            print(er)
+        except BaseException:
             return None
 
 #    def select_te(self, value):

@@ -18,10 +18,10 @@ async def start(message: types.Message, state: FSMContext):
         with Database() as db:
             fetchone = db.select_db('group_id', 'users', 'id', message.chat.id)
         if fetchone[0] != 0 and not None:
-            await message.answer(t.hi_text, reply_markup=key.main_success(message.chat.id))
+            await message.answer(t.hi_text, reply_markup=key.main_menu(message.chat.id))
             await state.finish()
             return
-    except TypeError:
+    except BaseException as er:
         # TODO: make exception, rework reg check
         pass
     await message.answer(t.faculty_message, reply_markup=key.inline_choose('faculty', 'groups'))
@@ -45,12 +45,12 @@ async def user_register(call: types.CallbackQuery, state: FSMContext):
         gid = db.select_gid(data['faculty'], call.data)
         if fetchone is None:
             db.create_user(call.message.chat.id, gid[0])
-    await call.message.answer(t.hi_text, reply_markup=key.main_success(call.message.chat.id))
+    await call.message.answer(t.hi_text, reply_markup=key.main_menu(call.message.chat.id))
     await state.finish()
 
 
 async def cancel(message: types.Message, state: FSMContext):
-    await message.answer("Відміна!", reply_markup=key.main_success(message.chat.id))
+    await message.answer("Відміна!", reply_markup=key.main_menu(message.chat.id))
     await state.finish()
 
 
