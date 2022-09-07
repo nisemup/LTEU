@@ -6,7 +6,6 @@ import os
 from multiprocessing import Process
 from pathlib import Path
 from bot import loader as load
-from bot.requests import Groups
 from aiogram import Bot, Dispatcher, executor, types
 from django.core.asgi import get_asgi_application
 from dotenv import load_dotenv

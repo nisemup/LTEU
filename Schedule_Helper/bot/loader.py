@@ -21,7 +21,7 @@ dp = Dispatcher(bot, storage=storage)
 
 async def set_commands():
     commands = [
-        BotCommand(command="/cancel", description="Отмена действий.")
+        BotCommand(command="/cancel", description="Скасування будь-якої дії.")
     ]
     await bot.set_my_commands(commands)
 

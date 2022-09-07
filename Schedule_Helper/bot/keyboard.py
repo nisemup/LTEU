@@ -1,4 +1,5 @@
 from aiogram import types
+from .database import Database
 from .language import uk_UA as t
 
 
@@ -40,8 +41,9 @@ def main_menu(aid):
     keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True)
     keyboard.add(t.b_timetable)
     keyboard.add(t.b_settings)
-    if aid in admins():
-        keyboard.add(t.b_admin)
+    with Database() as db:
+        if aid in db.get_admins():
+            keyboard.add(t.b_admin)
     return keyboard
 
 
@@ -78,9 +80,9 @@ def send_news():
 
 def pair_type():
     keyboard = types.InlineKeyboardMarkup()
-    lc = types.InlineKeyboardButton(text=t.b_prst_lc, callback_data='lc')
-    pr = types.InlineKeyboardButton(text=t.b_prst_pr, callback_data='pr')
-    keyboard.add(lc, pr)
+    odd = types.InlineKeyboardButton(text=t.b_prst_lc, callback_data='odd')
+    even = types.InlineKeyboardButton(text=t.b_prst_pr, callback_data='even')
+    keyboard.add(odd, even)
     return keyboard
 
 
@@ -102,23 +104,29 @@ def sdl_confirm():
 
 def sdl(call='None'):
     keyboard = types.InlineKeyboardMarkup()
-    mon = types.InlineKeyboardButton(text='Пн', callback_data='mon')
-    tue = types.InlineKeyboardButton(text='Вт', callback_data='tue')
-    wed = types.InlineKeyboardButton(text='Ср', callback_data='wed')
-    thu = types.InlineKeyboardButton(text='Чт', callback_data='thu')
-    fri = types.InlineKeyboardButton(text='Пт', callback_data='fri')
+    mon = types.InlineKeyboardButton(text='Пн', callback_data='monday')
+    tue = types.InlineKeyboardButton(text='Вт', callback_data='tuesday')
+    wed = types.InlineKeyboardButton(text='Ср', callback_data='wednesday')
+    thu = types.InlineKeyboardButton(text='Чт', callback_data='thursday')
+    fri = types.InlineKeyboardButton(text='Пт', callback_data='friday')
+    sat = types.InlineKeyboardButton(text='Cб', callback_data='saturday')
     close = types.InlineKeyboardButton(text='Закрити', callback_data='close')
-    if call.data == 'mon':
-        mon = types.InlineKeyboardButton(text='👁', callback_data='mon')
-    elif call.data == 'tue':
-        tue = types.InlineKeyboardButton(text='👁', callback_data='tue')
-    elif call.data == 'wed':
-        wed = types.InlineKeyboardButton(text='👁', callback_data='wed')
-    elif call.data == 'thu':
-        thu = types.InlineKeyboardButton(text='👁', callback_data='thu')
-    elif call.data == 'fri':
-        fri = types.InlineKeyboardButton(text='👁', callback_data='fri')
-    keyboard.add(mon, tue, wed, thu, fri)
+    if call == 'None':
+        pass
+    else:
+        if call.data == 'monday':
+            mon = types.InlineKeyboardButton(text='👁', callback_data='monday')
+        elif call.data == 'tuesday':
+            tue = types.InlineKeyboardButton(text='👁', callback_data='tuesday')
+        elif call.data == 'wednesday':
+            wed = types.InlineKeyboardButton(text='👁', callback_data='wednesday')
+        elif call.data == 'thursday':
+            thu = types.InlineKeyboardButton(text='👁', callback_data='thursday')
+        elif call.data == 'friday':
+            fri = types.InlineKeyboardButton(text='👁', callback_data='friday')
+        elif call.data == 'saturday':
+            sat = types.InlineKeyboardButton(text='👁', callback_data='saturday')
+    keyboard.add(mon, tue, wed, thu, fri, sat)
     keyboard.add(close)
     return keyboard
 

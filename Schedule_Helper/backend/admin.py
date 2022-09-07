@@ -10,7 +10,8 @@ class Profile_Admin(admin.ModelAdmin):
 
 @admin.register(Schedule)
 class Schedule_Admin(admin.ModelAdmin):
-    list_display = ('id', 'name', 'group_id', 'day', 'number', 'type', 'classroom', 'start_time', 'end_time')
+    list_display = ('id', 'name', 'group_id', 'day', 'number', 'week_type', 'classroom', 'start_time', 'end_time')
+    list_filter = ('group_id', 'week_type', 'day')
 
 
 @admin.register(Groups)
