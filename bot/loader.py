@@ -1,12 +1,10 @@
 from aiogram.contrib.fsm_storage.mongo import MongoStorage
 from aiogram.types import BotCommand
-from .handlers.admin import register_handlers_admin
-from .handlers.common import register_handlers_common
-from .handlers.settings import register_handlers_settings
-from .handlers.timetable import register_handlers_timetable
 from aiogram import Bot, Dispatcher, types
 from dotenv import load_dotenv
+from .utils.database import Database
 from pathlib import Path
+import asyncio
 import os
 
 
@@ -25,10 +23,3 @@ async def set_commands():
         BotCommand(command="/cancel", description="Скасування будь-якої дії.")
     ]
     await bot.set_my_commands(commands)
-
-
-async def register_handlers(dp):
-    register_handlers_common(dp)
-    register_handlers_settings(dp)
-    register_handlers_timetable(dp)
-    register_handlers_admin(dp)

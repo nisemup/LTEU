@@ -1,7 +1,14 @@
 import asyncio
+import asyncpg
 import logging
 import uvicorn
 import os
+
+from bot.handlers.admin import register_handlers_admin
+from bot.handlers.settings import register_handlers_settings
+from bot.handlers.common import register_handlers_common
+from bot.handlers.timetable import register_handlers_timetable
+from bot.utils.middlewares import DbMiddleware
 
 from multiprocessing import Process
 from pathlib import Path
@@ -40,7 +47,18 @@ class MyBot:
     @staticmethod
     async def on_startup(dp: Dispatcher):
         await load.set_commands()
-        await load.register_handlers(dp)
+        pool = await asyncpg.create_pool(
+            database=os.getenv('DB_NAME'),
+            user=os.getenv('DB_USER'),
+            password=os.getenv('DB_PASSWORD'),
+            host=os.getenv('DB_HOST'),
+            port=os.getenv('DB_PORT')
+        )
+        dp.middleware.setup(DbMiddleware(pool))
+        register_handlers_common(dp)
+        register_handlers_settings(dp)
+        register_handlers_timetable(dp)
+        register_handlers_admin(dp)
 
     @staticmethod
     async def on_shutdown(dp: Dispatcher):

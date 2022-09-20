@@ -1,6 +1,6 @@
-from .. import keyboard as key
+from ..utils import keyboard as key
+from ..utils.database import Database
 from ..language import uk_UA as t
-from ..database import Database
 from aiogram import Dispatcher, types
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters import Text
@@ -12,35 +12,32 @@ class StartHandler(StatesGroup):
     user_register = State()
 
 
-async def start(message: types.Message, state: FSMContext):
+async def start(message: types.Message, state: FSMContext, data: Database):
     await state.finish()
     username = message.from_user.username if message.from_user.username else None
     await state.update_data(username=username)
-    with Database() as db:
-        data = db.get_faculty()
-    await message.answer(t.faculty_message, reply_markup=key.inline_choose(data))
+    faculty = await data.get_faculty()
+    await message.answer(t.faculty_message, reply_markup=key.inline_choose(faculty))
     await StartHandler.faculty_choose.set()
 
 
-async def cb_faculty(call: types.CallbackQuery, state: FSMContext):
+async def cb_faculty(call: types.CallbackQuery, state: FSMContext, data: Database):
     await state.update_data(faculty=call.data)
-    with Database() as db:
-        data = db.get_gnum(call.data)
+    gnum = await data.get_gnum(call.data)
     await call.message.edit_text(t.faculty_confirm + call.data)
     await call.message.answer(t.group_message,
-                              reply_markup=key.inline_choose(data))
+                              reply_markup=key.inline_choose(gnum))
     await call.answer()
     await StartHandler.user_register.set()
 
 
-async def user_register(call: types.CallbackQuery, state: FSMContext):
-    data = await state.get_data()
+async def user_register(call: types.CallbackQuery, state: FSMContext, data: Database):
+    fsm_data = await state.get_data()
     await call.message.edit_text(t.group_confirm + call.data)
-    with Database() as db:
-        gid = db.get_gid(data['faculty'], call.data)
-        if db.create_user(call.message.chat.id, gid, data['username']):
-            await call.message.answer(t.hi_text, reply_markup=key.main_menu(call.message.chat.id))
-            await state.finish()
+    gid = await data.get_gid(fsm_data['faculty'], call.data)
+    if await data.create_user(call.message.chat.id, gid, fsm_data['username']):
+        await call.message.answer(t.hi_text, reply_markup=key.main_menu(call.message.chat.id))
+        await state.finish()
 
 
 async def cancel(message: types.Message, state: FSMContext):
