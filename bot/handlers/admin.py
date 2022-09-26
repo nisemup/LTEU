@@ -1,17 +1,12 @@
 import aiogram.utils.exceptions
-from ..loader import bot, BASE_DIR
-from asyncio import sleep
-from dotenv import load_dotenv
-from ..utils import keyboard as key
-from ..language import uk_UA as t
+
+from .. import keyboard as key
 from aiogram import Dispatcher, types
-from ..utils.database import Database
+from ..database import Database
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters import Text
 from aiogram.dispatcher.filters.state import State, StatesGroup
-
-
-load_dotenv(BASE_DIR / "settings" / ".env")
+from ..utils import *
 
 
 class AdminMenu(StatesGroup):
@@ -21,6 +16,8 @@ class AdminMenu(StatesGroup):
 
 
 async def cmd_admin(message: types.Message, state: FSMContext):
+    with Database() as db:
+        admins = db.get_admins()
     if message.chat.id in admins:
         await message.answer(t.a_hi, reply_markup=key.admin())
         await AdminMenu.wait_menu.set()
@@ -30,7 +27,7 @@ async def cmd_admin(message: types.Message, state: FSMContext):
 
 
 async def menu(message: types.Message):
-    if message.text == t.b_newsletter:
+    if message.text == t.b_newsletter:  # Розсилка
         await message.answer(t.a_newsletter)
         await AdminMenu.wait_news.set()
     else:

@@ -1,7 +1,7 @@
-from Schedule_Helper.bot.language import uk_UA as t
-from Schedule_Helper.bot.utils.database import Database
-from Schedule_Helper.bot.utils.utils import create_schedule, get_week_type
-from Schedule_Helper.bot.utils import keyboard as key
+from .. import keyboard as key
+from ..language import uk_UA as t
+from ..database import Database
+from ..utils import create_schedule, get_week_type
 from aiogram import Dispatcher, types
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters import Text
@@ -13,29 +13,27 @@ class TimeTable(StatesGroup):
     callback_register = State()
 
 
-async def cmd_timetable(message: types.Message, state: FSMContext, data: Database):
-    week = get_week_type()
-    gid = await data.get_group(message.chat.id)
-    raw_data = await data.get_schedule(gid, week)
-    await state.update_data(data=create_schedule(raw_data))
+async def cmd_timetable(message: types.Message, state: FSMContext):
+    with Database() as db:
+        week = get_week_type()
+        gid = db.get_group(message.chat.id)
+        data = db.get_schedule(gid, week)
+    await state.update_data(data=create_schedule(data))
     await message.answer(t.day_text, reply_markup=key.sdl())
     await TimeTable.callback_register.set()
 
 
 async def callback_register(call: types.CallbackQuery, state: FSMContext):
-    fsm_data = await state.get_data()
+    data = await state.get_data()
     if call.data == 'close':
         await call.message.delete()
         await state.finish()
     else:
-        try:
-            await call.message.edit_text(
-                fsm_data[call.data] + t.form_footer if fsm_data.get(call.data) is not None else t.none_text,
-                reply_markup=key.sdl(call),
-                disable_web_page_preview=True
-            )
-        except aiogram.utils.exceptions:
-            pass
+        await call.message.edit_text(
+            data[call.data] + t.form_footer if data.get(call.data) is not None else t.none_text,
+            reply_markup=key.sdl(call),
+            disable_web_page_preview=True
+        )
     await call.answer()
     return
 
