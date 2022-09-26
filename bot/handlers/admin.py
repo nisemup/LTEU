@@ -47,15 +47,14 @@ async def newsletter(message: types.Message, state: FSMContext):
     await AdminMenu.wait_confirm.set()
 
 
-async def confirm_send(message: types.Message, state: FSMContext):
+async def confirm_send(message: types.Message, state: FSMContext, data: Database):
     if message.text == t.b_send_news:
-        data = await state.get_data()
-        with Database() as db:
-            users = db.get_uids_notif()
+        fsm_data = await state.get_data()
+        users = await data.get_uids_notif()
         for user in users:
             try:
                 print('Розсилка...')
-                await bot.send_message(user, data['text'])
+                await bot.send_message(user, fsm_data['text'])
             except aiogram.utils.exceptions.BotBlocked:
                 continue
             await sleep(0.3)
