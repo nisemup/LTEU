@@ -1,4 +1,4 @@
-from .language import uk_UA as t
+from Schedule_Helper.bot.language import uk_UA as t
 import datetime
 
 

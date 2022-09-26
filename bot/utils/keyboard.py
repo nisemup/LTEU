@@ -1,6 +1,12 @@
+import os
+from ..loader import BASE_DIR
+from dotenv import load_dotenv
 from aiogram import types
-from .database import Database
-from .language import uk_UA as t
+from ..utils.database import Database
+from ..language import uk_UA as t
+
+
+load_dotenv(BASE_DIR / "settings" / ".env")
 
 
 def inline_choose(data):
@@ -37,13 +43,12 @@ def day():
     return keyboard
 
 
-def main_menu(aid):
+def main_menu(uid):
     keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True)
     keyboard.add(t.b_timetable)
     keyboard.add(t.b_settings)
-    with Database() as db:
-        if aid in db.get_admins():
-            keyboard.add(t.b_admin)
+    if uid == int(os.getenv('MAIN_ADMIN')):
+        keyboard.add(t.b_admin)
     return keyboard
 
 
